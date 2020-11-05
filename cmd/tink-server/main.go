@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/packethost/pkg/env"
 	"github.com/packethost/pkg/log"
 	"github.com/tinkerbell/tink/db"
 	rpcServer "github.com/tinkerbell/tink/grpc-server"
@@ -34,8 +35,9 @@ func main() {
 
 	tinkDB := db.Connect(logger)
 
-	_, onlyMigration := os.LookupEnv("ONLY_MIGRATION")
-	if onlyMigration {
+	migrate := env.Bool("MIGRATE", true)
+        onlyMigrate := env.Bool("ONLY_MIGRATION", false)
+	if onlyMigrate || migrate {
 		logger.Info("Applying migrations. This process will end when migrations will take place.")
 		numAppliedMigrations, err := tinkDB.Migrate()
 		if err != nil {
@@ -43,7 +45,9 @@ func main() {
 			panic(err)
 		}
 		log.With("num_applied_migrations", numAppliedMigrations).Info("Migrations applied successfully")
-		os.Exit(0)
+		if onlyMigrate {
+			os.Exit(0)
+		}
 	}
 
 	numAvailableMigrations, err := tinkDB.CheckRequiredMigrations()
