@@ -10,7 +10,7 @@ if ! git ls-files | xargs codespell -q 3 -I .codespell-whitelist; then
 	failed=1
 fi
 
-if ! git ls-files '*.yml' '*.json' '*.md' | xargs prettier --check; then
+if ! git ls-files '*.json' '*.md' '*.yaml' '*.yml' | xargs prettier --check; then
 	failed=1
 fi
 
